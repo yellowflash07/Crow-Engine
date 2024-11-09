@@ -12,6 +12,12 @@
 #include <string>
 #include <vector>
 #include  <vulkan/vulkan_core.h>
+#include <optional>
+
+struct QueueFamilyIndices 
+{
+	std::optional<uint32_t> graphicsFamily;
+};
 
 class Engine
 {
@@ -26,8 +32,15 @@ private:
 	GLFWwindow* window;
 	VkInstance instance;
 	std::string appName = "No Name";
+	VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
+	VkDevice device;
 
+	void CreateLogicalDevice();
 	bool CheckValidationLayerSupport();
+	void PickPhysicalDevice();
+	bool IsDeviceSuitable(VkPhysicalDevice device);
+	QueueFamilyIndices FindQueueFamilies(VkPhysicalDevice device);
+
 	const std::vector<const char*> validationLayers = {
 	"VK_LAYER_KHRONOS_validation"
 	};

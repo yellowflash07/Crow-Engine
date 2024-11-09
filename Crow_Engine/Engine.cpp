@@ -62,6 +62,8 @@ void Engine::Init()
 
     std::cout << "Vulkan instance created\n";
 
+    PickPhysicalDevice();
+
 
 }
 
@@ -87,6 +89,11 @@ void Engine::Shutdown()
 	glfwDestroyWindow(window);
 
     glfwTerminate();
+}
+
+void Engine::CreateLogicalDevice()
+{
+
 }
 
 bool Engine::CheckValidationLayerSupport()
@@ -118,4 +125,80 @@ bool Engine::CheckValidationLayerSupport()
 
     return true;
 
+}
+
+
+void Engine::PickPhysicalDevice()
+{
+    uint32_t deviceCount = 0;
+    vkEnumeratePhysicalDevices(instance, &deviceCount, nullptr);
+
+    if (deviceCount == 0)
+    {
+		throw std::runtime_error("failed to find GPUs with Vulkan support!");
+	}
+
+	std::vector<VkPhysicalDevice> devices(deviceCount);
+	vkEnumeratePhysicalDevices(instance, &deviceCount, devices.data());
+
+    std::cout << deviceCount << " devices found\n";
+
+
+    for (const auto& device : devices)
+    {
+        if (IsDeviceSuitable(device))
+        {
+			physicalDevice = device;
+			break;
+		}
+	}
+
+    if (physicalDevice == VK_NULL_HANDLE)
+    {
+		throw std::runtime_error("failed to find a suitable GPU!");
+	}
+}
+
+bool Engine::IsDeviceSuitable(VkPhysicalDevice device)
+{
+    	//return true;
+	VkPhysicalDeviceProperties deviceProperties;
+	vkGetPhysicalDeviceProperties(device, &deviceProperties);
+    
+	VkPhysicalDeviceFeatures deviceFeatures;
+	vkGetPhysicalDeviceFeatures(device, &deviceFeatures);
+
+	bool isSuitable =  deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU && deviceFeatures.geometryShader;
+
+    if (isSuitable)
+    {
+		std::cout << "Device picked: " << deviceProperties.deviceName << std::endl;
+	}
+    QueueFamilyIndices indices = FindQueueFamilies(device);
+
+    return indices.graphicsFamily.has_value();
+  //  return isSuitable;
+}
+
+QueueFamilyIndices Engine::FindQueueFamilies(VkPhysicalDevice device)
+{
+    QueueFamilyIndices indices;
+    // Logic to find queue family indices to populate struct with
+    uint32_t queueFamilyCount = 0;
+    vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, nullptr);
+
+    std::vector<VkQueueFamilyProperties> queueFamilies(queueFamilyCount);
+    vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, queueFamilies.data());
+
+    int i = 0;
+    for (const auto& queueFamily : queueFamilies) {
+        if (queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT) {
+            indices.graphicsFamily = i;
+        }
+
+        i++;
+    }
+    
+
+    return indices;
 }
