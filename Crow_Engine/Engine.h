@@ -40,6 +40,7 @@ private:
 	void PickPhysicalDevice();
 	bool IsDeviceSuitable(VkPhysicalDevice device);
 	QueueFamilyIndices FindQueueFamilies(VkPhysicalDevice device);
+	VkQueue graphicsQueue;
 
 	const std::vector<const char*> validationLayers = {
 	"VK_LAYER_KHRONOS_validation"
