@@ -17,6 +17,7 @@
 #include <algorithm> // Necessary for std::clamp
 #include <cstdint> // Necessary for uint32_t
 #include <limits> // Necessary for std::numeric_limits
+#include "Model.h"
 
 struct QueueFamilyIndices  
 {
@@ -68,7 +69,7 @@ private:
 	VkSemaphore renderFinishedSemaphore;
 	VkFence inFlightFence;
 
-
+	void CreateInstance();
 	void CreateSurface();
 	void CreateLogicalDevice();
 	bool CheckValidationLayerSupport();
@@ -88,6 +89,14 @@ private:
 	void RecordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex);
 	void DrawFrame();
 	void CreateSyncObjects();
+
+	const std::vector<Vertex> vertices = {
+	{{0.0f, -0.5f}, {1.0f, 1.0f, 1.0f}},
+	{{0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}},
+	{{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}}
+	};
+
+	Model* triModel;
 
 	//shader
 	void CreateGraphicsPipeline();
