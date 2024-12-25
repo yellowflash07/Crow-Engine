@@ -47,7 +47,7 @@ struct Vertex {
 class Model
 {
 public:
-	Model();
+	Model(VkCommandPool commandPool, VkQueue graphicsQueue);
 	~Model();
 
 	void Bind(VkCommandBuffer& commandBuffer);
@@ -55,7 +55,10 @@ public:
 	void CreateVertexBuffer(std::vector<Vertex> vertices, VkDevice device, VkPhysicalDevice physicalDevice);
 
 private:
-	
+	void CreateBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& bufferMemory, VkDevice device, VkPhysicalDevice physicalDevice);
+	void CopyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size, VkDevice device, VkCommandPool commandPool, VkQueue graphicsQueue);
+	VkCommandPool commandPool;
+	VkQueue graphicsQueue;
 	VkBuffer vertexBuffer;
 	VkDeviceMemory vertexBufferMemory;
 	VkBuffer indexBuffer;

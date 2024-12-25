@@ -64,7 +64,7 @@ void Engine::Init()
     CreateFramebuffers();
     CreateCommandPool();
 
-    triModel = new Model();
+    triModel = new Model(commandPool, graphicsQueue);
     triModel->CreateVertexBuffer(vertices, device, physicalDevice);
 
     CreateCommandBuffer();
@@ -91,7 +91,22 @@ void Engine::Update()
 
 void Engine::Shutdown()
 {
-    vkDestroyInstance(instance, nullptr);
+   //  vkDestroySurfaceKHR(instance, surface, nullptr);
+   //  vkDestroyInstance(instance, nullptr);
+   // vkDestroyDevice(device, nullptr);
+   //// vkDestroyShaderModule(device, fragShaderModule, nullptr);
+   //// vkDestroyShaderModule(device, vertShaderModule, nullptr);
+
+   // for (auto framebuffer : swapChainFramebuffers) {
+   //     vkDestroyFramebuffer(device, framebuffer, nullptr);
+   // }
+
+   // vkDestroyCommandPool(device, commandPool, nullptr);
+
+   // vkDestroySemaphore(device, imageAvailableSemaphore, nullptr);
+   // vkDestroySemaphore(device, renderFinishedSemaphore, nullptr);
+   // vkDestroyFence(device, inFlightFence, nullptr);
+   // vkDestroyInstance(instance, nullptr);
 
 	glfwDestroyWindow(window);
 
