@@ -24,9 +24,12 @@
 *.lai
 *.la
 *.a
-*.lib
+*.pdb
 
 # Executables
 *.exe
 *.out
 *.app
+
+.vs/
+x64/
