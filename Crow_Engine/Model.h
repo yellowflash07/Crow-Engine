@@ -53,8 +53,9 @@ public:
 	void Bind(VkCommandBuffer& commandBuffer);
 	void Draw(VkCommandBuffer& commandBuffer);
 	void CreateVertexBuffer(std::vector<Vertex> vertices, VkDevice device, VkPhysicalDevice physicalDevice);
-
+	void CreateIndexBuffer(std::vector<uint32_t> indices, VkDevice device, VkPhysicalDevice physicalDevice);
 private:
+	std::vector<uint32_t> indices;
 	void CreateBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& bufferMemory, VkDevice device, VkPhysicalDevice physicalDevice);
 	void CopyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size, VkDevice device, VkCommandPool commandPool, VkQueue graphicsQueue);
 	VkCommandPool commandPool;

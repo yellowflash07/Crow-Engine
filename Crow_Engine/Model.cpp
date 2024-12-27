@@ -16,11 +16,14 @@ void Model::Bind(VkCommandBuffer& commandBuffer)
 	VkBuffer vertexBuffers[] = { vertexBuffer };
 	VkDeviceSize offsets[] = { 0 };
 	vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
+	vkCmdBindIndexBuffer(commandBuffer, indexBuffer, 0, VK_INDEX_TYPE_UINT32);
+
 }
 
 void Model::Draw(VkCommandBuffer& commandBuffer)
 {
-	vkCmdDraw(commandBuffer, static_cast<uint32_t>(vertices.size()), 1, 0, 0);
+	//vkCmdDraw(commandBuffer, static_cast<uint32_t>(vertices.size()), 1, 0, 0);
+	vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(indices.size()), 1, 0, 0, 0);
 }
 
 void Model::CreateVertexBuffer(std::vector<Vertex> vertices, VkDevice device, VkPhysicalDevice physicalDevice)
@@ -40,6 +43,28 @@ void Model::CreateVertexBuffer(std::vector<Vertex> vertices, VkDevice device, Vk
 	CreateBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, vertexBuffer, vertexBufferMemory, device, physicalDevice);
 
 	CopyBuffer(stagingBuffer, vertexBuffer, bufferSize, device, commandPool, graphicsQueue);
+
+	vkDestroyBuffer(device, stagingBuffer, nullptr);
+	vkFreeMemory(device, stagingBufferMemory, nullptr);
+}
+
+void Model::CreateIndexBuffer(std::vector<uint32_t> indices, VkDevice device, VkPhysicalDevice physicalDevice)
+{
+	this->indices = indices;
+
+	VkDeviceSize bufferSize = sizeof(indices[0]) * indices.size();
+	VkBuffer stagingBuffer;
+	VkDeviceMemory stagingBufferMemory;
+	CreateBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingBufferMemory, device, physicalDevice);
+
+	void* data;
+	vkMapMemory(device, stagingBufferMemory, 0, bufferSize, 0, &data);
+	memcpy(data, indices.data(), (size_t)bufferSize);
+	vkUnmapMemory(device, stagingBufferMemory);
+
+	CreateBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, indexBuffer, indexBufferMemory, device, physicalDevice);
+
+	CopyBuffer(stagingBuffer, indexBuffer, bufferSize, device, commandPool, graphicsQueue);
 
 	vkDestroyBuffer(device, stagingBuffer, nullptr);
 	vkFreeMemory(device, stagingBufferMemory, nullptr);

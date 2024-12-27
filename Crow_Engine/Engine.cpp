@@ -66,7 +66,7 @@ void Engine::Init()
 
     triModel = new Model(commandPool, graphicsQueue);
     triModel->CreateVertexBuffer(vertices, device, physicalDevice);
-
+    triModel->CreateIndexBuffer(indices, device, physicalDevice);
     CreateCommandBuffer();
     CreateSyncObjects();
 }
