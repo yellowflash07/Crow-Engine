@@ -17,7 +17,9 @@
 #include <algorithm> // Necessary for std::clamp
 #include <cstdint> // Necessary for uint32_t
 #include <limits> // Necessary for std::numeric_limits
+#include "Common.h"
 #include "Model.h"
+
 
 struct QueueFamilyIndices  
 {
@@ -64,10 +66,15 @@ private:
 	VkPipelineLayout pipelineLayout;
 	VkPipeline graphicsPipeline;
 	VkCommandPool commandPool;
-	VkCommandBuffer commandBuffer;
-	VkSemaphore imageAvailableSemaphore;
-	VkSemaphore renderFinishedSemaphore;
-	VkFence inFlightFence;
+	std::vector<VkCommandBuffer> commandBuffers;
+	VkDescriptorPool descriptorPool;
+	VkDescriptorSetLayout descriptorSetLayout;
+	std::vector<VkDescriptorSet> descriptorSets;
+
+	std::vector<VkSemaphore> imageAvailableSemaphore;
+	std::vector<VkSemaphore> renderFinishedSemaphore;
+	std::vector<VkFence> inFlightFence;
+	uint32_t currentFrame = 0;
 
 	void CreateInstance();
 	void CreateSurface();
@@ -89,6 +96,17 @@ private:
 	void RecordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex);
 	void DrawFrame();
 	void CreateSyncObjects();
+	void CreateDescriptorSetLayout(); // the blueprint
+	void CreateDescriptorPool(); // the "locker" with the parts
+	void CreateDescriptorSets(); // the parts themselves
+
+	void CreateUniformBuffers(uint32_t imageCount);
+	//we need to create a uniform buffer for each image in the swap chain
+	std::vector<VkBuffer> uniformBuffers;
+	std::vector<VkDeviceMemory> uniformBuffersMemory;
+	std::vector<void*> uniformBuffersData;
+	float frameTime;
+	void UpdateUniformBuffers(uint32_t currentImage);
 
 	const std::vector<Vertex> vertices = {
 	{{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}},

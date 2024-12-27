@@ -8,6 +8,11 @@ Model::Model(VkCommandPool commandPool, VkQueue graphicsQueue)
 
 Model::~Model()
 {
+	vkDestroyBuffer(device, indexBuffer, nullptr);
+    vkFreeMemory(device, indexBufferMemory, nullptr);
+
+    vkDestroyBuffer(device, vertexBuffer, nullptr);
+    vkFreeMemory(device, vertexBufferMemory, nullptr);
 	//vkDestroyBuffer(device, vertexBuffer, nullptr);
 }
 
@@ -23,13 +28,15 @@ void Model::Bind(VkCommandBuffer& commandBuffer)
 void Model::Draw(VkCommandBuffer& commandBuffer)
 {
 	//vkCmdDraw(commandBuffer, static_cast<uint32_t>(vertices.size()), 1, 0, 0);
+	transform.model = glm::rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 	vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(indices.size()), 1, 0, 0, 0);
 }
 
 void Model::CreateVertexBuffer(std::vector<Vertex> vertices, VkDevice device, VkPhysicalDevice physicalDevice)
 {
 	this->vertices = vertices;
-
+	this->device = device;
+	this->physicalDevice = physicalDevice;
 	VkDeviceSize bufferSize = sizeof(vertices[0]) * vertices.size();
 	VkBuffer stagingBuffer;
     VkDeviceMemory stagingBufferMemory;
@@ -70,32 +77,7 @@ void Model::CreateIndexBuffer(std::vector<uint32_t> indices, VkDevice device, Vk
 	vkFreeMemory(device, stagingBufferMemory, nullptr);
 }
 
-void Model::CreateBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& bufferMemory, VkDevice device, VkPhysicalDevice physicalDevice)
-{
-	VkBufferCreateInfo bufferInfo{};
-	bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-	bufferInfo.size = size;
-	bufferInfo.usage = usage;
-	bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
-	if (vkCreateBuffer(device, &bufferInfo, nullptr, &buffer) != VK_SUCCESS) {
-		throw std::runtime_error("failed to create buffer!");
-	}
-
-	VkMemoryRequirements memRequirements;
-	vkGetBufferMemoryRequirements(device, buffer, &memRequirements);
-
-	VkMemoryAllocateInfo allocInfo{};
-	allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-	allocInfo.allocationSize = memRequirements.size;
-	allocInfo.memoryTypeIndex = FindMemoryType(memRequirements.memoryTypeBits, properties, physicalDevice);
-
-	if (vkAllocateMemory(device, &allocInfo, nullptr, &bufferMemory) != VK_SUCCESS) {
-		throw std::runtime_error("failed to allocate buffer memory!");
-	}
-
-	vkBindBufferMemory(device, buffer, bufferMemory, 0);
-}
 
 void Model::CopyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size, VkDevice device, VkCommandPool commandPool, VkQueue graphicsQueue)
 {
@@ -135,19 +117,7 @@ void Model::CopyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size
 
 }
 
-uint32_t Model::FindMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties, VkPhysicalDevice device)
-{
-	VkPhysicalDeviceMemoryProperties memProperties;
-	vkGetPhysicalDeviceMemoryProperties(device, &memProperties);
-
-	for (uint32_t i = 0; i < memProperties.memoryTypeCount; i++) {
-		if ((typeFilter & (1 << i)) &&
-			(memProperties.memoryTypes[i].propertyFlags & properties) == properties) {
-			return i;
-		}
-	}
-
-	throw std::runtime_error("failed to find suitable memory type!");
 
 
-}
+
+
