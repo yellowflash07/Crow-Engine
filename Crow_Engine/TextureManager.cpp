@@ -91,7 +91,7 @@ bool TextureManager::LoadTexture(std::string fileName)
 
 void TextureManager::CreateTextureImageView()
 {
-    textureImageView = CreateImageView(texture->textureImage, VK_FORMAT_R8G8B8A8_SRGB, device);
+    textureImageView = CreateImageView(texture->textureImage, VK_FORMAT_R8G8B8A8_SRGB, device, VK_IMAGE_ASPECT_COLOR_BIT);
 }
 
 void TextureManager::CreateTextureSampler()

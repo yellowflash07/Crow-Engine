@@ -82,6 +82,11 @@ private:
 	std::vector<VkFence> inFlightFence;
 	uint32_t currentFrame = 0;
 
+	//depth
+	VkImage depthImage;
+	VkDeviceMemory depthImageMemory;
+	VkImageView depthImageView;
+
 	void CreateInstance();
 	void CreateSurface();
 	void CreateLogicalDevice();
@@ -113,16 +118,24 @@ private:
 	std::vector<void*> uniformBuffersData;
 	float frameTime;
 	void UpdateUniformBuffers(uint32_t currentImage);
+	void CreateDepthResources();
 
 	const std::vector<Vertex> vertices = {
-		{ {-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
-		{{0.5f, -0.5f},  {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f}},
-		{{0.5f, 0.5f} ,  {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}},
-		{{-0.5f, 0.5f},  {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}}
+	{{-0.5f, -0.5f, 0.0f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
+	{{0.5f, -0.5f, 0.0f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f}},
+	{{0.5f, 0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}},
+	{{-0.5f, 0.5f, 0.0f}, {1.0f, 1.0f, 1.0f}, {0.0f, 1.0f}},
+
+	{{-0.5f, -0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
+	{{0.5f, -0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f}},
+	{{0.5f, 0.5f, -0.5f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}},
+	{{-0.5f, 0.5f, -0.5f}, {1.0f, 1.0f, 1.0f}, {0.0f, 1.0f}}
 	};
 
-
-	const std::vector<uint32_t> indices = { 0, 1, 2, 2, 3, 0 };
+	const std::vector<uint32_t> indices = {
+		0, 1, 2, 2, 3, 0,
+		4, 5, 6, 6, 7, 4
+	};
 
 	//Model* triModel;
 	TextureManager* textureManager;
