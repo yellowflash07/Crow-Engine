@@ -7,7 +7,7 @@
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include <glm/vec4.hpp>
 #include <glm/mat4x4.hpp>
-
+#include <glm/gtc/matrix_transform.hpp>
 #include <iostream>
 #include <string>
 #include <vector>
@@ -17,9 +17,15 @@
 #include <algorithm> // Necessary for std::clamp
 #include <cstdint> // Necessary for uint32_t
 #include <limits> // Necessary for std::numeric_limits
+#include <algorithm>	// Necessary for std::clamp
+#include <cstdint>		// Necessary for uint32_t
+#include <limits>		// Necessary for std::numeric_limits
+#include "Common.h"
 #include "Model.h"
+#include <chrono>
+#include "TextureManager.h"
 
-struct QueueFamilyIndices  
+struct QueueFamilyIndices
 {
 	//optional is a wrapper that contains a value or nothing
 	std::optional<uint32_t> graphicsFamily;
@@ -32,7 +38,7 @@ struct QueueFamilyIndices
 
 };
 
-struct SwapChainSupportDetails 
+struct SwapChainSupportDetails
 {
 	VkSurfaceCapabilitiesKHR capabilities;
 	std::vector<VkSurfaceFormatKHR> formats;
@@ -41,6 +47,7 @@ struct SwapChainSupportDetails
 
 class Engine
 {
+
 public:
 	Engine();
 	~Engine();
@@ -48,6 +55,7 @@ public:
 	void Run();
 	void Update();
 	void Shutdown();
+	Model* triModel;
 private:
 	GLFWwindow* window;
 	VkInstance instance;
@@ -64,10 +72,15 @@ private:
 	VkPipelineLayout pipelineLayout;
 	VkPipeline graphicsPipeline;
 	VkCommandPool commandPool;
-	VkCommandBuffer commandBuffer;
-	VkSemaphore imageAvailableSemaphore;
-	VkSemaphore renderFinishedSemaphore;
-	VkFence inFlightFence;
+	std::vector<VkCommandBuffer> commandBuffers;
+	VkDescriptorPool descriptorPool;
+	VkDescriptorSetLayout descriptorSetLayout;
+	std::vector<VkDescriptorSet> descriptorSets;
+
+	std::vector<VkSemaphore> imageAvailableSemaphore;
+	std::vector<VkSemaphore> renderFinishedSemaphore;
+	std::vector<VkFence> inFlightFence;
+	uint32_t currentFrame = 0;
 
 	void CreateInstance();
 	void CreateSurface();
@@ -89,19 +102,30 @@ private:
 	void RecordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex);
 	void DrawFrame();
 	void CreateSyncObjects();
+	void CreateDescriptorSetLayout(); // the blueprint
+	void CreateDescriptorPool(); // the "locker" with the parts
+	void CreateDescriptorSets(); // the parts themselves
+
+	void CreateUniformBuffers(uint32_t imageCount);
+	//we need to create a uniform buffer for each image in the swap chain
+	std::vector<VkBuffer> uniformBuffers;
+	std::vector<VkDeviceMemory> uniformBuffersMemory;
+	std::vector<void*> uniformBuffersData;
+	float frameTime;
+	void UpdateUniformBuffers(uint32_t currentImage);
 
 	const std::vector<Vertex> vertices = {
-	{{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}},
-	{{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}},
-	{{0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}},
-	{{-0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}}
+		{ {-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
+		{{0.5f, -0.5f},  {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f}},
+		{{0.5f, 0.5f} ,  {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}},
+		{{-0.5f, 0.5f},  {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}}
 	};
 
-	const std::vector<uint32_t> indices = {
-	0, 1, 2, 2, 3, 0
-	};
 
-	Model* triModel;
+	const std::vector<uint32_t> indices = { 0, 1, 2, 2, 3, 0 };
+
+	//Model* triModel;
+	TextureManager* textureManager;
 
 	//shader
 	void CreateGraphicsPipeline();
@@ -125,4 +149,3 @@ private:
 	const bool enableValidationLayers = true;
 #endif
 };
-
